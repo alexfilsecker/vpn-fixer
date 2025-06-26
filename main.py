@@ -2,7 +2,9 @@ import subprocess
 import pyotp
 import time
 
-from file_utils import load_secret, check_config, check_auth_file, write_vpn_auth, load_creds
+from file_utils import load_secret, check_config, write_vpn_auth, load_creds
+from smart_logger import SmartLogger
+from totp import generate_totp_code
 
 OPENVPN_BIN_PATH = "openvpn"
 CONFIG_PATH = ".configs/client.ovpn"
@@ -12,14 +14,10 @@ CREDENTIALS_PATH = ".configs/credentials.txt"
 LOGS_DIR = "logs"
 
 
+
 def loop(secret: str, credentials: tuple[str, str]):
-    totp = pyotp.TOTP(secret)
-    time_remaining = totp.interval - (int(time.time()) % totp.interval)
-    if time_remaining < 3:
-        print("Waiting for the next TOTP code...")
-        time.sleep(time_remaining + 1)
-    
-    code = totp.now()
+    logger = SmartLogger(LOGS_DIR)
+    code = generate_totp_code(secret, logger)
     write_vpn_auth(AUTH_PATH, credentials, code)
 
     process = subprocess.Popen(
@@ -31,30 +29,12 @@ def loop(secret: str, credentials: tuple[str, str]):
         bufsize=1  # Line-buffered
     )
 
-    local_now_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
-    log_path = f"{LOGS_DIR}/{local_now_iso}.log"
-
-    print("\n\n-------- OPENVPN LOGS --------")
-    print("Starting OpenVPN process...")
-    print(f"Muting logs till connection. Full logs can be found in {log_path}")
-    print("Connecting to OpenVPN...")
-
-    print_enable = False
     for line in process.stdout:
-        with open(log_path, 'a') as log_file:
-            log_file.write(line)
-        
-        if "Initialization Sequence Completed" in line:
-            print("\nOpenVPN connection established successfully.")
-            print("Unmuting logs...\n")
-            print_enable = True
-        
-        if print_enable:
-            print(line.strip())
-    
+        logger.new_line(line)
+
     process.stdout.close()
     process.wait()
-    print("OpenVPN process finished.")
+    logger.end(process.returncode)
     
 
 def main():
@@ -67,9 +47,6 @@ def main():
         return
     
     if not check_config(CONFIG_PATH):
-        return
-
-    if not check_auth_file(AUTH_PATH):
         return
     
     while True:

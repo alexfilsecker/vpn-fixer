@@ -40,20 +40,6 @@ def check_config(config_path) -> bool:
         return False
 
 
-def check_auth_file(auth_path) -> bool:
-    try:
-        with open(auth_path, 'r') as auth_file:
-            lines = auth_file.readlines()
-            if len(lines) != 2:
-                print(f"Error: {auth_path} should contain exactly 2 lines (username and password).")
-                return False
-
-            return True
-
-    except FileNotFoundError:
-        print(f"Error: {auth_path} not found.")
-        return False
-
 
 def write_vpn_auth(auth_path: str, credentials: tuple[str, str], code: str) -> None:
     with open(auth_path, 'w') as auth_file:

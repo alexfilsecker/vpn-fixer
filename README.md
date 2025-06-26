@@ -52,7 +52,7 @@ Y es porque nos faltan los archivos de configuración
 
 ### Archivos de configuración
 
-Vamos a necesitar añadir tres (3) archivos de configuración dentro del directorio `.config`: `client.ovpn`, `credentials.txt`, `secret.txt`. Todos con dicho nombre.
+Vamos a crear un directorio `.configs` y añadiremos tres (3) archivos de configuración: `client.ovpn`, `credentials.txt`, `secret.txt`. Todos con dicho nombre.
 
 #### client.ovpn
 

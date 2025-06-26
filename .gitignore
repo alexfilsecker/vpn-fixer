@@ -1,5 +1,5 @@
 .venv/
 .configs/*
-logs/
+logs/*
 .python-version
 __pycache__/

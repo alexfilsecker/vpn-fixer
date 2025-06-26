@@ -1,0 +1,5 @@
+.venv/
+.configs/*
+logs/
+.python-version
+__pycache__/

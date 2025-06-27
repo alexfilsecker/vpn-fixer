@@ -86,8 +86,13 @@ YOUR CERTIFICATE
 ```
 
 Es muy importante que añadamos la linea de autenticación ya que no viene por defecto.
-```ovpn
+```
 auth-user-pass .configs/vpn-auth.txt # Añadir esta linea
+```
+
+Si queremos que los logs funcionen bien, no puede existir una linea que sea del estilo
+```
+mute 20
 ```
 
 #### credentials.txt

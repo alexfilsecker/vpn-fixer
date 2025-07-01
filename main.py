@@ -1,14 +1,13 @@
 import subprocess
-import pyotp
-import time
 
-from file_utils import load_secret, check_config, write_vpn_auth, load_creds
+from file_utils import check_config, write_vpn_auth, load_creds
 from smart_logger import SmartLogger
 from totp import generate_totp_code
+from read_qr import read_secret_in_qr
 
 OPENVPN_BIN_PATH = "openvpn"
 CONFIG_PATH = ".configs/client.ovpn"
-SECRET_PATH = ".configs/secret.txt"
+QR_PATH = ".configs/qr.png"
 AUTH_PATH = ".configs/vpn-auth.txt"
 CREDENTIALS_PATH = ".configs/credentials.txt"
 LOGS_DIR = "logs"
@@ -30,7 +29,9 @@ def loop(secret: str, credentials: tuple[str, str]):
     )
 
     for line in process.stdout:
-        logger.new_line(line)
+        error = logger.new_line(line)
+        if error:
+            process.kill()
 
     process.stdout.close()
     process.wait()
@@ -38,7 +39,7 @@ def loop(secret: str, credentials: tuple[str, str]):
     
 
 def main():
-    secret = load_secret(SECRET_PATH)
+    secret = read_secret_in_qr(QR_PATH)
     if not secret:
         return
     

@@ -19,7 +19,8 @@ class SmartLogger:
             ("AUTH: Received control message: AUTH_FAILED", "Login Failed"),
             ("PUSH: Received control message: ", self.handle_recieve_control),
             ("/sbin/route add -net", self.handle_add_route),
-            ("/sbin/route delete -net", self.handle_add_route),
+            ("/sbin/route delete -net", self.handle_del_route),
+            ("AEAD Decrypt error: cipher final failed", self.decrypt_error),
             ("OPTIONS IMPORT: --ifconfig/up options modified", self.handle_options),
             ("Initialization Sequence Completed", self.handle_success)
         )
@@ -38,9 +39,10 @@ class SmartLogger:
         print("OpenVPN process exited with code:", return_code)
         print("-------- END OF OPENVPN LOGS --------")  
 
-    def new_line(self, line: str) -> None:
+    def new_line(self, line: str) -> bool:
         self.ovpn_log(line)
         
+        error = False
         for line_control in self.line_controls:
             key = line_control[0]
             if key in line:
@@ -48,7 +50,13 @@ class SmartLogger:
                 if isinstance(control, str):
                     print(control)
                 elif callable(control):
-                    control(line)
+                    return_control = control(line)
+                    if return_control:
+                        error = True
+            
+                break
+        
+        return error
 
     def general_check_if_log(self, line: str, mute: Tuple[str, str]) -> bool:
         for unwanted in mute:
@@ -69,7 +77,7 @@ class SmartLogger:
 
         if not self.general_check_if_log(line, self.mute_delete):
             if self.del_counter == 0:
-                log("\n--- ADD LINES MUTED ---\n\n")
+                log("\n--- DELETE LINES MUTED ---\n\n")
             return
 
         log(line)
@@ -112,3 +120,7 @@ class SmartLogger:
         print(f"\rDeleted route {self.add_counter}/{self.route_counter}", end="", flush=True)
         if self.del_counter == self.route_counter:
              print()
+
+    def decrypt_error(self, _) -> True:
+        print("Decript Error")
+        return True

@@ -3,7 +3,11 @@ from PIL import Image
 from urllib.parse import urlparse, parse_qs
 
 def read_secret_in_qr(qr_path: str) -> str | None:
-    image = Image.open(qr_path)
+    try:
+        image = Image.open(qr_path)
+    except FileNotFoundError:
+        print(f"QR not found in {qr_path}")
+        return None
     decoded_objects = decode(image)
     
     if len(decoded_objects) != 1:

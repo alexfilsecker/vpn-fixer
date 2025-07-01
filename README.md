@@ -6,15 +6,15 @@ La VPN de la Digital Factory se cae a cada rato, es por eso que he creado este s
 
 Para correr esto vamos a necesitar setear un poco nuestro mac
 
-### Instalar openvpn
+### Instalar libs
 
-Lo primero que vamos a necesitar es el binario `openvpn` que podemos conseguir de `brew` con
+Lo primero que vamos a necesitar son los binarios `openvpn` y `zbar` que podemos conseguir de `brew` con
 
 ```bash
-brew install openvpn
+brew install openvpn zbar
 ```
 
-Como este packete es una herramienta de sistema `brew` no crea un `symlink` a `/usr/local/bin` así que tenemos que crearlo nosotros:
+`zbar` no necesita nada mas, pero como `openvpn` es una herramienta de sistema, `brew` no crea un `symlink` a `/usr/local/bin` así que tenemos que crearlo nosotros:
 
 ```bash
 ln -s /usr/local/opt/openvpn/sbin/openvpn /usr/local/bin
@@ -45,14 +45,14 @@ sudo python main.py
 Deberíamos ver:
 
 ```
-Error: .configs/secret.txt not found.
+QR not found in .configs/qr.png
 ```
 
 Y es porque nos faltan los archivos de configuración
 
 ### Archivos de configuración
 
-Vamos a crear un directorio `.configs` y añadiremos tres (3) archivos de configuración: `client.ovpn`, `credentials.txt`, `secret.txt`. Todos con dicho nombre.
+Vamos a crear un directorio `.configs` y añadiremos tres (3) archivos de configuración: `client.ovpn`, `credentials.txt` y `qr.png`. Todos con dicho nombre.
 
 #### client.ovpn
 
@@ -105,16 +105,8 @@ LDAP-password
 ```
 Importante colocar la solo la contraseña, sin el código de authenticator.
 
-### secret.txt
+### qr.png
 
-Este es probablemente el archivo más complejo de conseguir. Lo que necesitamos es el QR que nos envía la digital factory para el segundo factor de autenticación. Para eso ingresamos a [portal](https://portal.fif.tech/profile) y presionamos el botón que dice "**Solicitar segundo factor de de Autenticación vpn FIFTech**".
+Necesitamos es el QR que nos envía la digital factory para el segundo factor de autenticación. Para eso ingresamos a [portal](https://portal.fif.tech/profile) y presionamos el botón que dice "**Solicitar segundo factor de de Autenticación vpn FIFTech**".
 
-Vamos a Teams y descargamos la imagen QR que nos acaba de llegar con **Bender** fumando un puro. Luego ingresamos a [QR Code Scanner](https://webqr.com/index.html), cargamos la imagen y leemos el string que entrega. Debería ser algo como:
-
-```
-otpauth://totp/afilsecker@falabella.cl?secret=<TU_SECRET>&issuer=OpenVPN%20vpn.fif.tech
-```
-
-Copiamos el query parameter `secret` y lo pegamos en el archivo `.config/secret.txt`.
-
-Con eso tendríamos todo para correr este programa.
+Vamos a Teams y descargamos la imagen QR que nos acaba de llegar con **Bender** fumando un puro y la pegamos en `.configs/` con el nombre `qr.png`

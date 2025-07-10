@@ -1,18 +1,3 @@
-def load_secret(secret_path: str) -> str | None:
-    try:
-        with open(secret_path, 'r') as secret_file:
-            secret = secret_file.readline().strip()
-            if not secret:
-                print(f"Error: {secret_path} is empty.")
-                return None
-        
-            return secret
-            
-    except FileNotFoundError:
-        print(f"Error: {secret_path} not found.")
-        return None
-
-
 def load_creds(creds_path: str) -> tuple[str, str] | None:
     try:
         with open(creds_path, 'r') as creds_file:

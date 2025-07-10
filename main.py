@@ -1,17 +1,16 @@
 import subprocess
 
-from file_utils import check_config, write_vpn_auth, load_creds
-from smart_logger import SmartLogger
-from totp import generate_totp_code
-from read_qr import read_secret_in_qr
+from src.file_utils import check_config, load_creds, write_vpn_auth
+from src.read_qr import read_secret_in_qr
+from src.smart_logger import SmartLogger
+from src.totp import generate_totp_code
 
 OPENVPN_BIN_PATH = "openvpn"
 CONFIG_PATH = ".configs/client.ovpn"
 QR_PATH = ".configs/qr.png"
-AUTH_PATH = ".configs/vpn-auth.txt"
-CREDENTIALS_PATH = ".configs/credentials.txt"
+AUTH_PATH = ".configs/.auth"
+CREDENTIALS_PATH = ".configs/.creds"
 LOGS_DIR = "logs"
-
 
 
 def loop(secret: str, credentials: tuple[str, str]):
@@ -25,7 +24,7 @@ def loop(secret: str, credentials: tuple[str, str]):
         stderr=subprocess.STDOUT,  # Combine stdout + stderr
         stdin=subprocess.PIPE,
         text=True,
-        bufsize=1  # Line-buffered
+        bufsize=1,  # Line-buffered
     )
 
     for line in process.stdout:
@@ -36,20 +35,20 @@ def loop(secret: str, credentials: tuple[str, str]):
     process.stdout.close()
     process.wait()
     logger.end(process.returncode)
-    
+
 
 def main():
     secret = read_secret_in_qr(QR_PATH)
     if not secret:
         return
-    
+
     credentials = load_creds(CREDENTIALS_PATH)
     if not credentials:
         return
-    
+
     if not check_config(CONFIG_PATH):
         return
-    
+
     while True:
         loop(secret, credentials)
 
@@ -59,4 +58,3 @@ if __name__ == "__main__":
         main()
     except KeyboardInterrupt:
         print("Process interrupted by user.")
- 

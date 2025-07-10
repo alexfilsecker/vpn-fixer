@@ -1,6 +1,8 @@
-from pyzbar.pyzbar import decode
+from urllib.parse import parse_qs, urlparse
+
 from PIL import Image
-from urllib.parse import urlparse, parse_qs
+from pyzbar.pyzbar import decode
+
 
 def read_secret_in_qr(qr_path: str) -> str | None:
     try:
@@ -9,7 +11,7 @@ def read_secret_in_qr(qr_path: str) -> str | None:
         print(f"QR not found in {qr_path}")
         return None
     decoded_objects = decode(image)
-    
+
     if len(decoded_objects) != 1:
         print("Probably not the correct qr")
         return None
@@ -34,6 +36,3 @@ def read_secret_in_qr(qr_path: str) -> str | None:
 if __name__ == "__main__":
     secret = read_secret_in_qr(".configs/qr.png")
     print(secret)
-    
-
-

@@ -1,6 +1,9 @@
-import pyotp
 import time
-from smart_logger import SmartLogger
+
+import pyotp
+
+from .smart_logger import SmartLogger
+
 
 def generate_totp_code(secret, logger: SmartLogger) -> str:
     totp = pyotp.TOTP(secret)
@@ -8,5 +11,6 @@ def generate_totp_code(secret, logger: SmartLogger) -> str:
     if time_remaining < 3:
         logger.waiting()
         time.sleep(time_remaining + 1)
-    
+
     return totp.now()
+

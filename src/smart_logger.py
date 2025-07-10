@@ -1,6 +1,5 @@
-
 import time
-from typing import Dict, Union, Tuple
+from typing import Dict, Tuple, Union
 
 
 class SmartLogger:
@@ -9,11 +8,8 @@ class SmartLogger:
             "/sbin/route add -net",
             "add net ",
         )
-        self.mute_delete = (
-             "/sbin/route delete -net",
-            "delete net "
-        )
-        
+        self.mute_delete = ("/sbin/route delete -net", "delete net ")
+
         self.line_controls = (
             ("SENT CONTROL", self.handle_sent_control),
             ("AUTH: Received control message: AUTH_FAILED", "Login Failed"),
@@ -22,7 +18,7 @@ class SmartLogger:
             ("/sbin/route delete -net", self.handle_del_route),
             ("AEAD Decrypt error: cipher final failed", self.decrypt_error),
             ("OPTIONS IMPORT: --ifconfig/up options modified", self.handle_options),
-            ("Initialization Sequence Completed", self.handle_success)
+            ("Initialization Sequence Completed", self.handle_success),
         )
         local_now_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
         self.log_path = f"{logs_dir}/{local_now_iso}.log"
@@ -37,11 +33,11 @@ class SmartLogger:
 
     def end(self, return_code) -> None:
         print("OpenVPN process exited with code:", return_code)
-        print("-------- END OF OPENVPN LOGS --------")  
+        print("-------- END OF OPENVPN LOGS --------")
 
     def new_line(self, line: str) -> bool:
         self.ovpn_log(line)
-        
+
         error = False
         for line_control in self.line_controls:
             key = line_control[0]
@@ -53,9 +49,9 @@ class SmartLogger:
                     return_control = control(line)
                     if return_control:
                         error = True
-            
+
                 break
-        
+
         return error
 
     def general_check_if_log(self, line: str, mute: Tuple[str, str]) -> bool:
@@ -67,7 +63,7 @@ class SmartLogger:
 
     def ovpn_log(self, line: str) -> None:
         def log(line: str):
-            with open(self.log_path, 'a') as log_file:
+            with open(self.log_path, "a") as log_file:
                 log_file.write(line)
 
         if not self.general_check_if_log(line, self.mute_add):
@@ -81,7 +77,6 @@ class SmartLogger:
             return
 
         log(line)
-        
 
     # Handlers
     def handle_sent_control(self, _):
@@ -99,28 +94,35 @@ class SmartLogger:
             print("Logged in succesfully")
             print("Recieving routes...")
             self.logging_in = False
-        
+
         splited = line.split("'")
         body = splited[1]
         controls = body.split(",")
         for control in controls:
             if control.startswith("route "):
                 self.route_counter += 1
-        
+
         print("\rroutes:", self.route_counter, end="", flush=True)
 
     def handle_add_route(self, _) -> None:
-         self.add_counter += 1
-         print(f"\rAdded route {self.add_counter}/{self.route_counter}", end="", flush=True)
-         if self.add_counter == self.route_counter:
-             print()
-    
+        self.add_counter += 1
+        print(
+            f"\rAdded route {self.add_counter}/{self.route_counter}", end="", flush=True
+        )
+        if self.add_counter == self.route_counter:
+            print()
+
     def handle_del_route(self, _) -> None:
         self.del_counter += 1
-        print(f"\rDeleted route {self.add_counter}/{self.route_counter}", end="", flush=True)
+        print(
+            f"\rDeleted route {self.add_counter}/{self.route_counter}",
+            end="",
+            flush=True,
+        )
         if self.del_counter == self.route_counter:
-             print()
+            print()
 
     def decrypt_error(self, _) -> True:
         print("Decript Error")
         return True
+

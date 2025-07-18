@@ -1,0 +1,9 @@
+{
+  "OPENVPN_BIN_PATH": "openvpn",
+  "CONFIG_PATH": ".configs/client.ovpn",
+  "QR_PATH": ".configs/qr.png",
+  "AUTH_PATH": ".configs/.auth",
+  "CREDENTIALS_PATH": ".configs/.creds",
+  "LOGS_DIR": "logs",
+  "HEALTH_URL": "https://parlo-test-banco-cl-chat-preprod-priv.fif.tech/parlo"
+}

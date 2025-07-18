@@ -1,5 +1,5 @@
 import time
-from typing import Dict, Tuple, Union
+from typing import Callable, Dict, List, Tuple, Union
 
 
 class SmartLogger:
@@ -10,7 +10,7 @@ class SmartLogger:
         )
         self.mute_delete = ("/sbin/route delete -net", "delete net ")
 
-        self.line_controls = (
+        self.line_controls = [
             ("SENT CONTROL", self.handle_sent_control),
             ("AUTH: Received control message: AUTH_FAILED", "Login Failed"),
             ("PUSH: Received control message: ", self.handle_recieve_control),
@@ -19,7 +19,7 @@ class SmartLogger:
             ("AEAD Decrypt error: cipher final failed", self.decrypt_error),
             ("OPTIONS IMPORT: --ifconfig/up options modified", self.handle_options),
             ("Initialization Sequence Completed", self.handle_success),
-        )
+        ]
         local_now_iso = time.strftime("%Y-%m-%dT%H:%M:%S", time.localtime())
         self.log_path = f"{logs_dir}/{local_now_iso}.log"
         self.route_counter = 0
@@ -31,28 +31,32 @@ class SmartLogger:
     def waiting(self) -> None:
         print("Waiting for next totp code...")
 
+    def killed(self) -> None:
+        print("KILLED BY THREAD")
+
     def end(self, return_code) -> None:
         print("OpenVPN process exited with code:", return_code)
         print("-------- END OF OPENVPN LOGS --------")
 
-    def new_line(self, line: str) -> bool:
+    def new_line(self, line: str) -> str | None:
         self.ovpn_log(line)
 
-        error = False
         for line_control in self.line_controls:
             key = line_control[0]
-            if key in line:
-                control = line_control[1]
-                if isinstance(control, str):
-                    print(control)
-                elif callable(control):
-                    return_control = control(line)
-                    if return_control:
-                        error = True
+            if key not in line:
+                continue
 
-                break
+            control = line_control[1]
+            if isinstance(control, str):
+                print(control)
+            elif callable(control):
+                return_control = control(line)
+                if return_control is not None:
+                    return return_control
 
-        return error
+            break
+
+        return None
 
     def general_check_if_log(self, line: str, mute: Tuple[str, str]) -> bool:
         for unwanted in mute:
@@ -86,8 +90,9 @@ class SmartLogger:
     def handle_options(self, _) -> None:
         print()
 
-    def handle_success(self, _) -> None:
+    def handle_success(self, _) -> str:
         print("VPN STARTED!")
+        return "started"
 
     def handle_recieve_control(self, line: str):
         if self.logging_in:
@@ -122,7 +127,6 @@ class SmartLogger:
         if self.del_counter == self.route_counter:
             print()
 
-    def decrypt_error(self, _) -> True:
+    def decrypt_error(self, _) -> str:
         print("Decript Error")
-        return True
-
+        return "error"

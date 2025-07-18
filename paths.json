@@ -5,5 +5,6 @@
   "AUTH_PATH": ".configs/.auth",
   "CREDENTIALS_PATH": ".configs/.creds",
   "LOGS_DIR": "logs",
-  "HEALTH_URL": "https://parlo-test-banco-cl-chat-preprod-priv.fif.tech/parlo"
+  "HEALTH_URL": "https://parlo-test-banco-cl-chat-preprod-priv.fif.tech/parlo",
+  "KEEP_LOG_TIME": "8h"
 }

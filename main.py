@@ -2,7 +2,7 @@ import subprocess
 from threading import Lock, Thread
 
 from src.checker import health_checker
-from src.file_utils import check_config, load_creds, write_vpn_auth
+from src.file_utils import check_config, load_creds, write_vpn_auth, clean_old_logs
 from src.paths import Paths
 from src.read_qr import read_secret_in_qr
 from src.smart_logger import SmartLogger
@@ -54,6 +54,7 @@ def loop(secret: str, credentials: tuple[str, str], p: Paths):
 
 def main():
     p = Paths()
+    clean_old_logs(p.LOGS_DIR, p.KEEP_LOG_TIME)
     secret = read_secret_in_qr(p.QR_PATH)
     if not secret:
         return

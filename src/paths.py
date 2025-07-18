@@ -13,3 +13,4 @@ class Paths:
         self.CREDENTIALS_PATH = obj["CREDENTIALS_PATH"]
         self.LOGS_DIR = obj["LOGS_DIR"]
         self.HEALTH_URL = obj["HEALTH_URL"]
+        self.KEEP_LOG_TIME = obj["KEEP_LOG_TIME"]
